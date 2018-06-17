@@ -14,6 +14,9 @@ use Illuminate\Support\Facades\Storage;
 use App\Events\Frontend\Auth\UserConfirmed;
 use App\Events\Frontend\Auth\UserProviderRegistered;
 use App\Notifications\Frontend\Auth\UserNeedsConfirmation;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Foundation\Auth\ResetsPasswords;
 
 /**
  * Class UserRepository.
@@ -147,5 +150,57 @@ class UserRepository extends BaseRepository
            return implode(';', $file_names);
         }
         return $file_name;
+    }
+
+    /**
+     * @param array $data
+     *
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    public function resetForgotPassword(array $data)
+    {
+        $user = $this->findByEmail($data['email']);
+
+        /*
+        * save the new password and send email
+        */
+        if ($user instanceof $this->model) {
+            $password = $this->randomPassword(8);
+            $user->password = $password;
+            $user->save();
+
+           // event(new PasswordReset($user));
+           // $user->notify(new UserNeedsConfirmation($user->email));
+
+            return $user;
+        }
+    }
+
+    public function randomPassword($length) 
+    {
+       $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_-=+;:,.?";
+       $password = substr( str_shuffle( $chars ), 0, $length );
+
+       return $password;
+    }
+
+    /**
+     * @param array $data
+     *
+     * @return \Illuminate\Database\Eloquent\Model|mixed
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    public function updatePassword(array $data)
+    {
+        $user = $this->getById(auth()->id());
+
+        if (Hash::check($data['oldPassword'], $user->password)) {
+            $user->password_changed_at = Carbon::now()->toDateTimeString();
+            $user->update(['password' => $data['password']]);
+
+            return $user;
+        }
     }
 }

@@ -14,7 +14,10 @@ use Illuminate\Http\Request;
 */
 Route::middleware('api')->post('/register' , 'API\UserController@register');
 Route::middleware('api')->post('/login' , 'API\UserController@login');
+Route::middleware('api')->post('/forgot_password' , 'API\UserController@forgotPassword');
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::middleware('auth:api')->post('/update_password' , 'API\UserController@updatePassword');

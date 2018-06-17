@@ -44,7 +44,12 @@ class UserController extends Controller
         return response($user);
     }
     
-    
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     * @throws \Throwable
+     */
     public function login(Request $request) 
     {
         auth()->shouldUse('api');
@@ -58,6 +63,32 @@ class UserController extends Controller
         }
     
         return response(['Invalid Credentials']);
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     * @throws \Throwable
+     */
+    public function forgotPassword(Request $request) 
+    {
+        $user = $this->userRepository->resetForgotPassword($request->only('email'));
+        
+        return response($user);
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     * @throws \Throwable
+     */
+    public function updatePassword(Request $request)
+    {
+        $user = $this->userRepository->updatePassword($request->only('oldPassword', 'password'));
+        
+        return response($user);
     }
     
     public function tokenFromUser($id)
