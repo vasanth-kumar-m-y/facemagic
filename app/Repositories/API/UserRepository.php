@@ -13,7 +13,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use App\Events\Frontend\Auth\UserConfirmed;
 use App\Events\Frontend\Auth\UserProviderRegistered;
-use App\Notifications\Frontend\Auth\UserNeedsConfirmation;
+use App\Notifications\API\UserNeedsUuid;
+use App\Notifications\API\UserNeedsNewPassword;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Foundation\Auth\ResetsPasswords;
@@ -115,19 +116,12 @@ class UserRepository extends BaseRepository
                  * Add the default site role to the new user
                  */
                 $user->assignRole(config('access.users.default_role'));
-            }
 
-            /*
-             * If users have to confirm their email and this is not a social account,
-             * and the account does not require admin approval
-             * send the confirmation email
-             *
-             * If this is a social account they are confirmed through the social provider by default
-             */
-            /* if (config('access.users.confirm_email')) {
-                // Pretty much only if account approval is off, confirm email is on, and this isn't a social account.
-                $user->notify(new UserNeedsConfirmation($user->uuid));
-            } */
+                /*
+                 * Send Uuid to the new user
+                 */
+                //$user->notify(new UserNeedsUuid($user->uuid));
+            }
 
             /*
              * Return the user object
@@ -170,8 +164,9 @@ class UserRepository extends BaseRepository
             $user->password = $password;
             $user->save();
 
-           // event(new PasswordReset($user));
-           // $user->notify(new UserNeedsConfirmation($user->email));
+           //event(new PasswordReset($user));
+
+           //$user->notify(new UserNeedsNewPassword($password));
 
             return $user;
         }
